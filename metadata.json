@@ -1,0 +1,6 @@
+{
+  "name": "Job Tracker",
+  "description": "An application to manage job applications, track status, save listings, and view application statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

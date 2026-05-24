@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    match /users/{userId}/applications/{applicationId} {
+      function isValidApp(data) {
+        return data.userId == userId &&
+               data.title is string && data.title.size() <= 200 &&
+               data.company is string && data.company.size() <= 200 &&
+               data.status is string && data.status.size() <= 50 &&
+               data.source is string && data.source.size() <= 100 &&
+               data.dateApplied is string && data.dateApplied.size() <= 50 &&
+               data.notes is string && data.notes.size() <= 20000 &&
+               data.isFavorite is bool &&
+               data.createdAt is number && data.updatedAt is number;
+      }
+      
+      allow read: if isOwner(userId) && isValidId(applicationId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(applicationId) && isValidApp(incoming()) && incoming().createdAt == request.time.toMillis();
+      allow update: if isOwner(userId) && isValidId(applicationId) && isValidApp(incoming()) && incoming().createdAt == existing().createdAt && incoming().updatedAt == request.time.toMillis();
+      allow delete: if isOwner(userId) && isValidId(applicationId);
+    }
+
+    match /users/{userId}/reminders/{reminderId} {
+      function isValidReminder(data) {
+        return data.userId == userId &&
+               data.type is string && data.type.size() <= 100 &&
+               data.date is string && data.date.size() <= 50 &&
+               data.isCompleted is bool &&
+               data.createdAt is number;
+      }
+      
+      allow read: if isOwner(userId) && isValidId(reminderId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(reminderId) && isValidReminder(incoming()) && incoming().createdAt == request.time.toMillis();
+      allow update: if isOwner(userId) && isValidId(reminderId) && isValidReminder(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(userId) && isValidId(reminderId);
+    }
+
+    match /users/{userId}/companyNotes/{noteId} {
+      function isValidNote(data) {
+        return data.userId == userId &&
+               data.company is string && data.company.size() <= 200 &&
+               data.notes is string && data.notes.size() <= 20000 &&
+               data.updatedAt is number;
+      }
+      
+      allow read: if isOwner(userId) && isValidId(noteId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(noteId) && isValidNote(incoming()) && incoming().updatedAt == request.time.toMillis();
+      allow update: if isOwner(userId) && isValidId(noteId) && isValidNote(incoming()) && incoming().updatedAt == request.time.toMillis();
+      allow delete: if isOwner(userId) && isValidId(noteId);
+    }
+  }
+}

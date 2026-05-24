@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "JobApplication": {
+      "title": "JobApplication",
+      "description": "A job application",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "company": { "type": "string" },
+        "status": { "type": "string", "enum": ["applied", "interview", "offer", "rejected", "pending"] },
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "dateApplied": { "type": "string" },
+        "salaryExpectation": { "type": "string" },
+        "location": { "type": "string" },
+        "workType": { "type": "string", "enum": ["Remote", "Hibrit", "Ofis"] },
+        "notes": { "type": "string" },
+        "isFavorite": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["userId", "title", "company", "status", "source", "dateApplied", "notes", "isFavorite", "createdAt", "updatedAt"]
+    },
+    "Reminder": {
+      "title": "Reminder",
+      "description": "A reminder for an application",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "type": { "type": "string" },
+        "date": { "type": "string" },
+        "notes": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["userId", "type", "date", "isCompleted", "createdAt"]
+    },
+    "CompanyNote": {
+      "title": "CompanyNote",
+      "description": "Notes about a company",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "company": { "type": "string" },
+        "industry": { "type": "string" },
+        "rating": { "type": "number" },
+        "disposition": { "type": "string", "enum": ["Olumlu", "Olumsuz", "Nötr"] },
+        "notes": { "type": "string" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["userId", "company", "notes", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/applications/{applicationId}": {
+      "schema": { "$ref": "#/entities/JobApplication" },
+      "description": "Job applications of a user"
+    },
+    "users/{userId}/reminders/{reminderId}": {
+      "schema": { "$ref": "#/entities/Reminder" },
+      "description": "Reminders of a user"
+    },
+    "users/{userId}/companyNotes/{noteId}": {
+      "schema": { "$ref": "#/entities/CompanyNote" },
+      "description": "Company notes of a user"
+    }
+  }
+}
